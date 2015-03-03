@@ -1,0 +1,114 @@
+﻿<Window x:Class="SharpMotion.SharpMotionAppWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sharpMotion="clr-namespace:SharpMotion"
+        x:Name="AppWindow"
+        Title="SharpMotion"
+        ResizeMode="CanResize"
+        SizeToContent="WidthAndHeight"
+        >
+    <Window.Resources>
+        <ResourceDictionary>
+            <sharpMotion:InverseBooleanConverter x:Key="Inverse" />
+
+            <Style x:Key="NoChromeButton" TargetType="{x:Type Button}">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="Padding" Value="1"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <Grid x:Name="Chrome" Background="{TemplateBinding Background}" SnapsToDevicePixels="true">
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsEnabled" Value="false">
+                                    <Setter Property="Foreground" Value="#ADADAD"/>
+                                    <Setter Property="Opacity" TargetName="Chrome" Value="0.5"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+    <DockPanel HorizontalAlignment="Stretch"
+               Margin="10,10,10,10"
+               >
+        <Grid HorizontalAlignment="Stretch" DockPanel.Dock="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBlock Text="Webcams" Margin="10,0,0,0" HorizontalAlignment="Right" Grid.Column="1" Grid.Row="0" />
+            <ComboBox x:Name="WebcamComboBox"
+                      ItemsSource="{Binding Webcams}"
+                      Width="250"
+                      Margin="10,0,0,0"
+                      Grid.Column="2"
+                      Grid.Row="0"
+                      SelectedItem="{Binding SelectedWebcam}"
+                      IsEnabled="{Binding Path=SelectedWebcam.IsRunning, Converter={StaticResource Inverse}}"
+                      >
+                <ComboBox.ItemTemplate>
+                    <DataTemplate DataType="sharpMotion:WebcamSourceViewModel">
+                        <TextBlock Text="{Binding Name}"></TextBlock>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <TextBlock Text="Resolution" Grid.Column="1" Grid.Row="1" Margin="10,10,0,0" HorizontalAlignment="Right" />
+            
+            <ComboBox x:Name="ResolutionComboBox"
+                      ItemsSource="{Binding SelectedWebcam.SupportedResolutions}"
+                      SelectedIndex="{Binding SelectedWebcam.SelectedResolutionIndex}"
+                      Margin="10,10,0,0"
+                      Grid.Row="1"
+                      Grid.Column="2"
+                      IsEnabled="{Binding Path=SelectedWebcam.IsRunning, Converter={StaticResource Inverse}}"
+                      />
+            
+            <Button x:Name="GoButton"
+                    Command="{Binding GoButtonCommand}"
+                    Margin="10,10,0,0"
+                    Click="GoButton_OnClick"
+                    Grid.Column="3"
+                    Grid.Row="1"
+                    >
+                <TextBlock Margin="10,0,10,0">Go</TextBlock>
+            </Button>
+            
+        </Grid>
+        <Border x:Name="ActiveImageBorder" Width="Auto" Height="Auto" BorderThickness="1" BorderBrush="Black" Margin="0,0,0,10">
+            <Button Style="{DynamicResource NoChromeButton}" Command="{Binding SnapshotCommand}">
+                <Grid>
+                    <Image x:Name="ActiveImage" Width="640" Height="480" Source="{Binding CurrentImage}"/>
+                    <Image x:Name="OverlayImage"
+                           Opacity="0.3"
+                           Source="{Binding LastImage}"
+                           Width="{Binding ElementName=ActiveImage, Path=Width}"
+                           Height="{Binding ElementName=ActiveImage, Path=Height}"
+                           />
+                    <Button Command="{Binding SnapshotCommand}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Bottom"
+                            Margin="0,0,0,10">
+                        <TextBlock Margin="10,0,10,0">Snapshot</TextBlock>
+                    </Button>
+            </Grid>
+            </Button>
+        </Border>
+        
+        
+    </DockPanel>
+</Window>
